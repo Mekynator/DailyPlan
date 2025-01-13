@@ -2,4 +2,4 @@ Flask==2.2.2
 Office365-REST-Python-Client==2.3.10
 python-dotenv==0.21.0
 openpyxl==3.0.10
-excel2img==0.5.1
+excel2img==1.4.0
