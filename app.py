@@ -17,8 +17,8 @@ app = Flask(__name__)
 load_dotenv()
 
 # SharePoint credentials and file paths
-SHAREPOINT_SITE_URL = os.getenv('SHAREPOINT_SITE_URL')
-SHAREPOINT_FILE_URL = os.getenv('SHAREPOINT_FILE_URL')
+SHAREPOINT_SITE_URL = os.getenv('https://dscloud-my.sharepoint.com/:x:/r/personal/mark_szeibert_sallinggroup_com')
+SHAREPOINT_FILE_URL = os.getenv('/Documents/DailyPlan/Plan.xlsm')
 SHAREPOINT_USERNAME = os.getenv('SHAREPOINT_USERNAME')
 SHAREPOINT_PASSWORD = os.getenv('SHAREPOINT_PASSWORD')
 
