@@ -5,6 +5,7 @@ from flask import Flask, redirect, url_for, send_file, jsonify, render_template_
 from dotenv import load_dotenv
 from office365.sharepoint.client_context import ClientContext
 from openpyxl import load_workbook
+import excel2img  # Assuming you are using this for generating images
 
 app = Flask(__name__)
 
@@ -17,11 +18,6 @@ SHAREPOINT_FILE_URL = os.getenv('SHAREPOINT_FILE_URL')
 SHAREPOINT_USERNAME = os.getenv('SHAREPOINT_USERNAME')
 SHAREPOINT_PASSWORD = os.getenv('SHAREPOINT_PASSWORD')
 
-# Define the temporary image folder path
-# In Koyeb, you should use the mounted persistent volume (e.g., /mnt/data/)
-TEMP_IMAGE_FOLDER = '/mnt/data/temp_images'
-os.makedirs(TEMP_IMAGE_FOLDER, exist_ok=True)
-
 # Logger setup
 logger = logging.getLogger('FlaskAppLogger')
 logger.setLevel(logging.INFO)
@@ -29,16 +25,20 @@ logger.setLevel(logging.INFO)
 console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.INFO)
 
-error_log_path = os.path.join(TEMP_IMAGE_FOLDER, 'Error.log')
-file_handler = logging.FileHandler(error_log_path)
-file_handler.setLevel(logging.ERROR)
+# Log to a temporary directory
+with tempfile.TemporaryDirectory() as temp_image_folder:
+    error_log_path = os.path.join(temp_image_folder, 'Error.log')
+    file_handler = logging.FileHandler(error_log_path)
+    file_handler.setLevel(logging.ERROR)
 
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-console_handler.setFormatter(formatter)
-file_handler.setFormatter(formatter)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    console_handler.setFormatter(formatter)
+    file_handler.setFormatter(formatter)
 
-logger.addHandler(console_handler)
-logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
+
+    logger.info(f"Temporary directory for logs created at {temp_image_folder}")
 
 
 def download_sharepoint_file():
@@ -52,13 +52,10 @@ def download_sharepoint_file():
         ctx.load(file)
         ctx.execute_query()
 
-        # Create a temporary file path for the downloaded file
-        temp_file_path = os.path.join(TEMP_IMAGE_FOLDER, 'Plan.xlsm')
-        os.makedirs(os.path.dirname(temp_file_path), exist_ok=True)
-
-        # Download the file to the specified path
-        with open(temp_file_path, "wb") as local_file:
-            file.download(local_file)
+        # Use tempfile to create a temporary file for the downloaded Excel file
+        with tempfile.NamedTemporaryFile(suffix='.xlsm', delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            file.download(temp_file)
             ctx.execute_query()
         
         logger.info(f"File downloaded successfully to {temp_file_path}")
@@ -136,14 +133,17 @@ def home():
 
         sheet_name, cell_range = page_ranges[page]
         image_filename = f"{page}.png"
-        image_path = os.path.join(TEMP_IMAGE_FOLDER, image_filename)
+        
+        # Use tempfile to create a temporary image folder dynamically
+        with tempfile.TemporaryDirectory() as temp_image_folder:
+            image_path = os.path.join(temp_image_folder, image_filename)
 
-        try:
-            generate_image(sheet_name, cell_range, image_path)
-            image_url = url_for('serve_image', filename=image_filename)
-            pages.append({'url': image_url, 'header': f"{sheet_name} Shift"})
-        except Exception as e:
-            logger.error(f"Failed to generate image for page '{page}': {e}")
+            try:
+                generate_image(sheet_name, cell_range, image_path)
+                image_url = url_for('serve_image', filename=image_filename)
+                pages.append({'url': image_url, 'header': f"{sheet_name} Shift"})
+            except Exception as e:
+                logger.error(f"Failed to generate image for page '{page}': {e}")
 
     if not pages:
         return "<h1>No images available for the active pages.</h1>"
