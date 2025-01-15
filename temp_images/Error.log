@@ -1,0 +1,12 @@
+2025-01-15 16:22:56,321 - FlaskAppLogger - ERROR - Failed to download SharePoint file: 'NoneType' object has no attribute 'rstrip'
+2025-01-15 16:22:56,321 - FlaskAppLogger - ERROR - Error generating image for 'Morning': Unable to download Excel file from SharePoint.
+2025-01-15 16:22:56,322 - FlaskAppLogger - ERROR - Failed to generate image for page 'Morning': Unable to download Excel file from SharePoint.
+2025-01-15 16:22:56,322 - FlaskAppLogger - ERROR - Failed to download SharePoint file: 'NoneType' object has no attribute 'rstrip'
+2025-01-15 16:22:56,322 - FlaskAppLogger - ERROR - Error generating image for 'Evening': Unable to download Excel file from SharePoint.
+2025-01-15 16:22:56,322 - FlaskAppLogger - ERROR - Failed to generate image for page 'Evening': Unable to download Excel file from SharePoint.
+2025-01-15 16:22:56,323 - FlaskAppLogger - ERROR - Failed to download SharePoint file: 'NoneType' object has no attribute 'rstrip'
+2025-01-15 16:22:56,323 - FlaskAppLogger - ERROR - Error generating image for 'Night': Unable to download Excel file from SharePoint.
+2025-01-15 16:22:56,323 - FlaskAppLogger - ERROR - Failed to generate image for page 'Night': Unable to download Excel file from SharePoint.
+2025-01-15 16:22:56,324 - FlaskAppLogger - ERROR - Failed to download SharePoint file: 'NoneType' object has no attribute 'rstrip'
+2025-01-15 16:22:56,324 - FlaskAppLogger - ERROR - Error generating image for 'Friday': Unable to download Excel file from SharePoint.
+2025-01-15 16:22:56,324 - FlaskAppLogger - ERROR - Failed to generate image for page 'Friday': Unable to download Excel file from SharePoint.
