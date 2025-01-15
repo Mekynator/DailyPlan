@@ -1,15 +1,15 @@
 import os
-import glob
 import logging
 import msoffcrypto
 import excel2img
 import tempfile
 from io import BytesIO
-from datetime import datetime, time
+from datetime import datetime
 from flask import Flask, redirect, url_for, send_file, jsonify, render_template_string
 from dotenv import load_dotenv
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.files.file import File
+from openpyxl import load_workbook
 
 app = Flask(__name__)
 
@@ -74,7 +74,6 @@ def download_sharepoint_file():
 
 def load_workbook_with_password(file_path, password):
     """Load a password-protected Excel workbook"""
-    from openpyxl import load_workbook
     try:
         with open(file_path, 'rb') as f:
             decrypted = BytesIO()
@@ -92,7 +91,6 @@ def load_workbook_with_password(file_path, password):
 
 def generate_image(sheet_name, cell_range, image_path):
     """Generate an image from an Excel sheet"""
-    from openpyxl import load_workbook
     try:
         # Download the file from SharePoint
         excel_file_path = download_sharepoint_file()
@@ -227,8 +225,7 @@ def home():
           }}, 30000);
 
           showPage(currentIndex);
-        }};
-      </script>
+        }};</script>
     </body>
     </html>
     """
@@ -239,4 +236,4 @@ def home():
 @app.route('/temp_images/<filename>')
 def serve_image(filename):
     """Serve generated images"""
-
+    return send_file(os.path.join(TEMP_IMAGE_FOLDER, filename))
