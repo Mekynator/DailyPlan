@@ -1,15 +1,26 @@
 import os
+import glob
 import logging
-import msoffcrypto
-import excel2img
 import tempfile
 from io import BytesIO
-from datetime import datetime
+from datetime import datetime, time
 from flask import Flask, redirect, url_for, send_file, jsonify, render_template_string
 from dotenv import load_dotenv
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.files.file import File
-from openpyxl import load_workbook
+
+# Attempt to import msoffcrypto and xlwings dynamically
+try:
+    import msoffcrypto
+    msoffcrypto_available = True
+except ImportError:
+    msoffcrypto_available = False
+
+try:
+    import xlwings as xw
+    xlwings_available = True
+except ImportError:
+    xlwings_available = False
 
 app = Flask(__name__)
 
@@ -17,8 +28,8 @@ app = Flask(__name__)
 load_dotenv()
 
 # SharePoint credentials and file paths
-SHAREPOINT_SITE_URL = os.getenv('https://dscloud-my.sharepoint.com/:x:/r/personal/mark_szeibert_sallinggroup_com')
-SHAREPOINT_FILE_URL = os.getenv('/Documents/DailyPlan/Plan.xlsm')
+SHAREPOINT_SITE_URL = os.getenv('SHAREPOINT_SITE_URL')
+SHAREPOINT_FILE_URL = os.getenv('SHAREPOINT_FILE_URL')
 SHAREPOINT_USERNAME = os.getenv('SHAREPOINT_USERNAME')
 SHAREPOINT_PASSWORD = os.getenv('SHAREPOINT_PASSWORD')
 
@@ -43,7 +54,6 @@ file_handler.setFormatter(formatter)
 
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
-
 
 def download_sharepoint_file():
     """Download the Excel file from SharePoint"""
@@ -71,23 +81,33 @@ def download_sharepoint_file():
         logger.error(f"Failed to download SharePoint file: {e}")
         return None
 
-
 def load_workbook_with_password(file_path, password):
-    """Load a password-protected Excel workbook"""
+    """Load a password-protected Excel workbook using msoffcrypto or xlwings"""
     try:
-        with open(file_path, 'rb') as f:
-            decrypted = BytesIO()
-            office_file = msoffcrypto.OfficeFile(f)
-            office_file.load_key(password=password)
-            office_file.decrypt(decrypted)
-            decrypted.seek(0)
-            workbook = load_workbook(decrypted, data_only=True)
-            logger.info(f"Successfully loaded workbook: {file_path}")
+        if msoffcrypto_available:
+            # Use msoffcrypto if available
+            with open(file_path, 'rb') as f:
+                decrypted = BytesIO()
+                office_file = msoffcrypto.OfficeFile(f)
+                office_file.load_key(password=password)
+                office_file.decrypt(decrypted)
+                decrypted.seek(0)
+                from openpyxl import load_workbook
+                workbook = load_workbook(decrypted, data_only=True)
+                logger.info(f"Successfully loaded workbook with msoffcrypto: {file_path}")
+                return workbook
+        elif xlwings_available:
+            # Use xlwings if msoffcrypto is not available but xlwings is
+            app = xw.App(visible=False)
+            workbook = app.books.open(file_path, password=password)
+            logger.info(f"Successfully loaded workbook with xlwings: {file_path}")
             return workbook
+        else:
+            logger.error("Neither msoffcrypto nor xlwings is available to decrypt the file.")
+            return None
     except Exception as e:
-        logger.error(f"Failed to load workbook '{file_path}': {e}")
+        logger.error(f"Failed to load workbook '{file_path}' with password: {e}")
         return None
-
 
 def generate_image(sheet_name, cell_range, image_path):
     """Generate an image from an Excel sheet"""
@@ -116,6 +136,7 @@ def generate_image(sheet_name, cell_range, image_path):
             workbook.save(temp_decrypted_path)
 
         # Generate image using excel2img
+        import excel2img
         excel2img.export_img(temp_decrypted_path, image_path, sheet_name, cell_range)
         logger.info(f"Generated image for '{sheet_name}' -> {image_path}")
 
@@ -225,7 +246,8 @@ def home():
           }}, 30000);
 
           showPage(currentIndex);
-        }};</script>
+        }};  
+      </script>
     </body>
     </html>
     """
@@ -237,3 +259,7 @@ def home():
 def serve_image(filename):
     """Serve generated images"""
     return send_file(os.path.join(TEMP_IMAGE_FOLDER, filename))
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
