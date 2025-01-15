@@ -3,24 +3,10 @@ import glob
 import logging
 import tempfile
 from io import BytesIO
-from datetime import datetime, time
 from flask import Flask, redirect, url_for, send_file, jsonify, render_template_string
 from dotenv import load_dotenv
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.files.file import File
-
-# Attempt to import msoffcrypto and xlwings dynamically
-try:
-    import msoffcrypto
-    msoffcrypto_available = True
-except ImportError:
-    msoffcrypto_available = False
-
-try:
-    import xlwings as xw
-    xlwings_available = True
-except ImportError:
-    xlwings_available = False
+from openpyxl import load_workbook
 
 app = Flask(__name__)
 
@@ -55,6 +41,7 @@ file_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
 
+
 def download_sharepoint_file():
     """Download the Excel file from SharePoint"""
     try:
@@ -62,7 +49,7 @@ def download_sharepoint_file():
         ctx = ClientContext(SHAREPOINT_SITE_URL).with_credentials(SHAREPOINT_USERNAME, SHAREPOINT_PASSWORD)
         
         # Fetch the file from SharePoint
-        file = File(ctx, SHAREPOINT_FILE_URL)
+        file = ctx.web.get_file_by_server_relative_url(SHAREPOINT_FILE_URL)
         ctx.load(file)
         ctx.execute_query()
 
@@ -81,33 +68,17 @@ def download_sharepoint_file():
         logger.error(f"Failed to download SharePoint file: {e}")
         return None
 
-def load_workbook_with_password(file_path, password):
-    """Load a password-protected Excel workbook using msoffcrypto or xlwings"""
+
+def load_workbook_simple(file_path):
+    """Load an unprotected Excel workbook using openpyxl"""
     try:
-        if msoffcrypto_available:
-            # Use msoffcrypto if available
-            with open(file_path, 'rb') as f:
-                decrypted = BytesIO()
-                office_file = msoffcrypto.OfficeFile(f)
-                office_file.load_key(password=password)
-                office_file.decrypt(decrypted)
-                decrypted.seek(0)
-                from openpyxl import load_workbook
-                workbook = load_workbook(decrypted, data_only=True)
-                logger.info(f"Successfully loaded workbook with msoffcrypto: {file_path}")
-                return workbook
-        elif xlwings_available:
-            # Use xlwings if msoffcrypto is not available but xlwings is
-            app = xw.App(visible=False)
-            workbook = app.books.open(file_path, password=password)
-            logger.info(f"Successfully loaded workbook with xlwings: {file_path}")
-            return workbook
-        else:
-            logger.error("Neither msoffcrypto nor xlwings is available to decrypt the file.")
-            return None
+        workbook = load_workbook(file_path, data_only=True)
+        logger.info(f"Successfully loaded workbook: {file_path}")
+        return workbook
     except Exception as e:
-        logger.error(f"Failed to load workbook '{file_path}' with password: {e}")
+        logger.error(f"Failed to load workbook '{file_path}': {e}")
         return None
+
 
 def generate_image(sheet_name, cell_range, image_path):
     """Generate an image from an Excel sheet"""
@@ -118,7 +89,7 @@ def generate_image(sheet_name, cell_range, image_path):
             raise Exception("Unable to download Excel file from SharePoint.")
         
         # Load workbook
-        workbook = load_workbook_with_password(excel_file_path, "9002602")
+        workbook = load_workbook_simple(excel_file_path)
         if not workbook:
             raise Exception("Unable to load workbook for image export.")
         
@@ -136,7 +107,6 @@ def generate_image(sheet_name, cell_range, image_path):
             workbook.save(temp_decrypted_path)
 
         # Generate image using excel2img
-        import excel2img
         excel2img.export_img(temp_decrypted_path, image_path, sheet_name, cell_range)
         logger.info(f"Generated image for '{sheet_name}' -> {image_path}")
 
@@ -246,7 +216,7 @@ def home():
           }}, 30000);
 
           showPage(currentIndex);
-        }};  
+        }};
       </script>
     </body>
     </html>
@@ -258,7 +228,11 @@ def home():
 @app.route('/temp_images/<filename>')
 def serve_image(filename):
     """Serve generated images"""
-    return send_file(os.path.join(TEMP_IMAGE_FOLDER, filename))
+    try:
+        return send_file(os.path.join(TEMP_IMAGE_FOLDER, filename))
+    except Exception as e:
+        logger.error(f"Failed to serve image {filename}: {e}")
+        return "Error serving image.", 500
 
 
 if __name__ == '__main__':
