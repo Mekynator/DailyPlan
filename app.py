@@ -1,8 +1,6 @@
 import os
-import glob
 import logging
 import tempfile
-from io import BytesIO
 from flask import Flask, redirect, url_for, send_file, jsonify, render_template_string
 from dotenv import load_dotenv
 from office365.sharepoint.client_context import ClientContext
@@ -14,13 +12,14 @@ app = Flask(__name__)
 load_dotenv()
 
 # SharePoint credentials and file paths
-SHAREPOINT_SITE_URL = os.getenv('https://dscloud-my.sharepoint.com/:x:/r/personal/mark_szeibert_sallinggroup_com')
-SHAREPOINT_FILE_URL = os.getenv('/Documents/Daily%20plan%20website/Plan.xlsm')
+SHAREPOINT_SITE_URL = os.getenv('SHAREPOINT_SITE_URL')
+SHAREPOINT_FILE_URL = os.getenv('SHAREPOINT_FILE_URL')
 SHAREPOINT_USERNAME = os.getenv('SHAREPOINT_USERNAME')
 SHAREPOINT_PASSWORD = os.getenv('SHAREPOINT_PASSWORD')
 
-# Temporary image folder
-TEMP_IMAGE_FOLDER = 'temp_images'
+# Define the temporary image folder path
+# In Koyeb, you should use the mounted persistent volume (e.g., /mnt/data/)
+TEMP_IMAGE_FOLDER = '/mnt/data/temp_images'
 os.makedirs(TEMP_IMAGE_FOLDER, exist_ok=True)
 
 # Logger setup
@@ -54,7 +53,7 @@ def download_sharepoint_file():
         ctx.execute_query()
 
         # Create a temporary file path for the downloaded file
-        temp_file_path = os.path.join('temp_files', 'Plan.xlsm')
+        temp_file_path = os.path.join(TEMP_IMAGE_FOLDER, 'Plan.xlsm')
         os.makedirs(os.path.dirname(temp_file_path), exist_ok=True)
 
         # Download the file to the specified path
@@ -202,7 +201,7 @@ def home():
             img.src = page.url;
             imageContainer.appendChild(img);
             return img;
-          }});
+          }}); 
 
           function showPage(idx) {{
             imgElements.forEach(img => img.classList.remove('active'));
@@ -216,8 +215,7 @@ def home():
           }}, 30000);
 
           showPage(currentIndex);
-        }};
-      </script>
+        }};</script>
     </body>
     </html>
     """
