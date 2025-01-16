@@ -1,0 +1,12 @@
+# Example .dockerignore
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.env
