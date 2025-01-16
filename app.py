@@ -4,9 +4,8 @@ import tempfile
 from flask import Flask, redirect, url_for, send_file, jsonify, render_template_string
 from dotenv import load_dotenv
 from office365.sharepoint.client_context import ClientContext
-from office365.runtime.auth.user_credential import UserCredential
 from openpyxl import load_workbook
-import excel2img  # Ensure this is in requirements.txt
+import excel2img  # Assuming you are using this for generating images
 
 app = Flask(__name__)
 
@@ -23,37 +22,44 @@ SHAREPOINT_PASSWORD = os.getenv('SHAREPOINT_PASSWORD')
 logger = logging.getLogger('FlaskAppLogger')
 logger.setLevel(logging.INFO)
 
-# Console handler
 console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.INFO)
 
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-console_handler.setFormatter(formatter)
+# Log to a temporary directory
+with tempfile.TemporaryDirectory() as temp_image_folder:
+    error_log_path = os.path.join(temp_image_folder, 'Error.log')
+    file_handler = logging.FileHandler(error_log_path)
+    file_handler.setLevel(logging.ERROR)
 
-logger.addHandler(console_handler)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    console_handler.setFormatter(formatter)
+    file_handler.setFormatter(formatter)
 
-logger.info("Logger initialized.")
+    logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
+
+    logger.info(f"Temporary directory for logs created at {temp_image_folder}")
 
 
 def download_sharepoint_file():
     """Download the Excel file from SharePoint"""
     try:
         # Set up SharePoint authentication
-        credentials = UserCredential(SHAREPOINT_USERNAME, SHAREPOINT_PASSWORD)
-        ctx = ClientContext(SHAREPOINT_SITE_URL).with_credentials(credentials)
+        ctx = ClientContext(SHAREPOINT_SITE_URL).with_credentials(SHAREPOINT_USERNAME, SHAREPOINT_PASSWORD)
         
         # Fetch the file from SharePoint
         file = ctx.web.get_file_by_server_relative_url(SHAREPOINT_FILE_URL)
         ctx.load(file)
         ctx.execute_query()
 
-        # Download the file content
-        with open('downloaded_file.xlsm', 'wb') as local_file:
-            file_content = file.read()
-            local_file.write(file_content)
+        # Use tempfile to create a temporary file for the downloaded Excel file
+        with tempfile.NamedTemporaryFile(suffix='.xlsm', delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            file.download(temp_file)
+            ctx.execute_query()
         
-        logger.info("File downloaded successfully.")
-        return 'downloaded_file.xlsm'
+        logger.info(f"File downloaded successfully to {temp_file_path}")
+        return temp_file_path
     except Exception as e:
         logger.error(f"Failed to download SharePoint file: {e}")
         return None
@@ -70,7 +76,7 @@ def load_workbook_simple(file_path):
         return None
 
 
-def generate_image(sheet_name, cell_range, image_filename):
+def generate_image(sheet_name, cell_range, image_path):
     """Generate an image from an Excel sheet"""
     try:
         # Download the file from SharePoint
@@ -96,17 +102,9 @@ def generate_image(sheet_name, cell_range, image_filename):
             temp_decrypted_path = tmp.name
             workbook.save(temp_decrypted_path)
 
-        # Define image path in the static/images directory
-        image_path = os.path.join('static', 'images', image_filename)
-        
-        # Ensure the images directory exists
-        os.makedirs(os.path.dirname(image_path), exist_ok=True)
-        
         # Generate image using excel2img
         excel2img.export_img(temp_decrypted_path, image_path, sheet_name, cell_range)
         logger.info(f"Generated image for '{sheet_name}' -> {image_path}")
-
-        return image_path
 
     except Exception as e:
         logger.error(f"Error generating image for '{sheet_name}': {e}")
@@ -116,8 +114,10 @@ def generate_image(sheet_name, cell_range, image_filename):
 @app.route('/')
 def home():
     """Main route to render the web page"""
+    # Determine which pages are active (this will be adjusted according to your rules)
     active_pages = ['Morning', 'Evening', 'Night', 'Friday']
 
+    # Sheet ranges for active pages
     page_ranges = {
         'Morning': ('Morning', 'A1:H33'),
         'Evening': ('Evening', 'A1:H33'),
@@ -134,12 +134,16 @@ def home():
         sheet_name, cell_range = page_ranges[page]
         image_filename = f"{page}.png"
         
-        try:
-            image_path = generate_image(sheet_name, cell_range, image_filename)
-            image_url = url_for('static', filename=f'images/{image_filename}')
-            pages.append({'url': image_url, 'header': f"{sheet_name} Shift"})
-        except Exception as e:
-            logger.error(f"Failed to generate image for page '{page}': {e}")
+        # Use tempfile to create a temporary image folder dynamically
+        with tempfile.TemporaryDirectory() as temp_image_folder:
+            image_path = os.path.join(temp_image_folder, image_filename)
+
+            try:
+                generate_image(sheet_name, cell_range, image_path)
+                image_url = url_for('serve_image', filename=image_filename)
+                pages.append({'url': image_url, 'header': f"{sheet_name} Shift"})
+            except Exception as e:
+                logger.error(f"Failed to generate image for page '{page}': {e}")
 
     if not pages:
         return "<h1>No images available for the active pages.</h1>"
@@ -217,6 +221,16 @@ def home():
     """
 
     return render_template_string(html_content, pages=pages)
+
+
+@app.route('/temp_images/<filename>')
+def serve_image(filename):
+    """Serve generated images"""
+    try:
+        return send_file(os.path.join(TEMP_IMAGE_FOLDER, filename))
+    except Exception as e:
+        logger.error(f"Failed to serve image {filename}: {e}")
+        return "Error serving image.", 500
 
 
 if __name__ == '__main__':
