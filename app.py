@@ -1,12 +1,15 @@
-cat << 'EOF' > app.py
 import os
 import logging
 import tempfile
+
 from flask import Flask, redirect, url_for, send_file, jsonify, render_template_string
 from dotenv import load_dotenv
 from office365.sharepoint.client_context import ClientContext
 from openpyxl import load_workbook
-import excel2img  # Assuming you are using this for generating images
+from openpyxl.utils import range_boundaries
+
+# For creating images in pure Python:
+from PIL import Image, ImageDraw, ImageFont
 
 app = Flask(__name__)
 
@@ -43,7 +46,7 @@ with tempfile.TemporaryDirectory() as temp_image_folder:
 
 
 def download_sharepoint_file():
-    """Download the Excel file from SharePoint"""
+    """Download the Excel file from SharePoint."""
     try:
         # Set up SharePoint authentication
         ctx = ClientContext(SHAREPOINT_SITE_URL).with_credentials(SHAREPOINT_USERNAME, SHAREPOINT_PASSWORD)
@@ -67,7 +70,7 @@ def download_sharepoint_file():
 
 
 def load_workbook_simple(file_path):
-    """Load an unprotected Excel workbook using openpyxl"""
+    """Load an unprotected Excel workbook using openpyxl."""
     try:
         workbook = load_workbook(file_path, data_only=True)
         logger.info(f"Successfully loaded workbook: {file_path}")
@@ -78,7 +81,12 @@ def load_workbook_simple(file_path):
 
 
 def generate_image(sheet_name, cell_range, image_path):
-    """Generate an image from an Excel sheet"""
+    """
+    Generate an image from an Excel sheet using a pure Python approach:
+      1. Download Excel file.
+      2. Load workbook with openpyxl.
+      3. Render the specified cell range to an image using Pillow.
+    """
     try:
         # Download the file from SharePoint
         excel_file_path = download_sharepoint_file()
@@ -94,18 +102,59 @@ def generate_image(sheet_name, cell_range, image_path):
         if sheet_name not in workbook.sheetnames:
             raise ValueError(f"Sheet '{sheet_name}' not found in workbook.")
         
-        # Hide gridlines
         wb_sheet = workbook[sheet_name]
+
+        # (Optional) Hide gridlines from the workbook's perspective (doesn't affect our rendering, but let's keep it)
         wb_sheet.sheet_view.showGridLines = False
 
-        # Save the workbook to a temporary file
-        with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp:
-            temp_decrypted_path = tmp.name
-            workbook.save(temp_decrypted_path)
+        # Convert the cell_range ("A1:H33") into numeric boundaries
+        min_col, min_row, max_col, max_row = range_boundaries(cell_range)
+        
+        # Naive approach: fixed column width and row height in pixels
+        # (You can improve by reading row/column dimensions from `wb_sheet.row_dimensions` / `wb_sheet.column_dimensions`.)
+        col_width_px = 60
+        row_height_px = 20
+        
+        total_cols = max_col - min_col + 1
+        total_rows = max_row - min_row + 1
+        
+        img_width = total_cols * col_width_px
+        img_height = total_rows * row_height_px
+        
+        # Create a new blank image
+        img = Image.new("RGB", (img_width, img_height), color="white")
+        draw = ImageDraw.Draw(img)
 
-        # Generate image using excel2img
-        excel2img.export_img(temp_decrypted_path, image_path, sheet_name, cell_range)
-        logger.info(f"Generated image for '{sheet_name}' -> {image_path}")
+        # Use default font or supply a TTF if you want better rendering
+        font = ImageFont.load_default()
+
+        # Iterate over cells in the range and draw text + rectangles
+        for row_idx in range(min_row, max_row + 1):
+            for col_idx in range(min_col, max_col + 1):
+                cell = wb_sheet.cell(row=row_idx, column=col_idx)
+                
+                # Basic text
+                value = str(cell.value) if cell.value is not None else ""
+                
+                # Calculate top-left corner in pixels
+                x1 = (col_idx - min_col) * col_width_px
+                y1 = (row_idx - min_row) * row_height_px
+                
+                # Calculate bottom-right corner
+                x2 = x1 + col_width_px
+                y2 = y1 + row_height_px
+                
+                # Draw cell border (rectangle outline)
+                draw.rectangle([x1, y1, x2, y2], outline="black", width=1)
+                
+                # Draw text inside cell with a small padding
+                text_x = x1 + 5
+                text_y = y1 + 5
+                draw.text((text_x, text_y), value, fill="black", font=font)
+        
+        # Finally, save the rendered image
+        img.save(image_path)
+        logger.info(f"Generated image for sheet '{sheet_name}', range '{cell_range}' -> {image_path}")
 
     except Exception as e:
         logger.error(f"Error generating image for '{sheet_name}': {e}")
@@ -114,7 +163,7 @@ def generate_image(sheet_name, cell_range, image_path):
 
 @app.route('/')
 def home():
-    """Main route to render the web page"""
+    """Main route to render the web page."""
     # Determine which pages are active (this will be adjusted according to your rules)
     active_pages = ['Morning', 'Evening', 'Night', 'Friday']
 
@@ -228,8 +277,10 @@ def home():
 def serve_image(filename):
     """Serve generated images"""
     try:
-        # If you have a dedicated temp folder or want an in-memory approach,
-        # adjust accordingly. For demonstration, using non-existent variable:
+        # If you're storing the PNG in a persistent folder, adapt accordingly.
+        # Using a new tempfile for each request won't work if the file is gone, 
+        # so you might need to store them persistently or re-generate on demand.
+        TEMP_IMAGE_FOLDER = "/some/persistent/folder"  # Adjust as needed
         return send_file(os.path.join(TEMP_IMAGE_FOLDER, filename))
     except Exception as e:
         logger.error(f"Failed to serve image {filename}: {e}")
@@ -238,4 +289,3 @@ def serve_image(filename):
 
 if __name__ == '__main__':
     app.run(debug=True)
-EOF
