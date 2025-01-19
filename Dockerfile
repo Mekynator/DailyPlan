@@ -28,5 +28,5 @@ EXPOSE 5000
 # Install Gunicorn (a production WSGI server for Flask)
 RUN pip install gunicorn
 
-# Run the Flask app using Gunicorn, bind to all interfaces
+# Use Gunicorn to serve the Flask app
 CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
