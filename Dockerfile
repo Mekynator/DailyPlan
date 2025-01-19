@@ -22,8 +22,11 @@ RUN pip install -r requirements.txt
 ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
 
-# Expose port 5000 for the Flask app
+# Expose the port for the Flask app
 EXPOSE 5000
 
-# Run the Flask app
-CMD ["flask", "run", "--host=0.0.0.0", "--port=5000"]
+# Install Gunicorn (a production WSGI server for Flask)
+RUN pip install gunicorn
+
+# Run the Flask app using Gunicorn, bind to all interfaces
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
