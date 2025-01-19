@@ -5,7 +5,8 @@ from flask import Flask, redirect, url_for, send_file, jsonify, render_template_
 from dotenv import load_dotenv
 from office365.sharepoint.client_context import ClientContext
 from openpyxl import load_workbook
-import excel2img  # Assuming you are using this for generating images
+import matplotlib.pyplot as plt
+import numpy as np
 
 app = Flask(__name__)
 
@@ -77,7 +78,7 @@ def load_workbook_simple(file_path):
 
 
 def generate_image(sheet_name, cell_range, image_path):
-    """Generate an image from an Excel sheet"""
+    """Generate an image from an Excel sheet using openpyxl and matplotlib"""
     try:
         # Download the file from SharePoint
         excel_file_path = download_sharepoint_file()
@@ -93,17 +94,28 @@ def generate_image(sheet_name, cell_range, image_path):
         if sheet_name not in workbook.sheetnames:
             raise ValueError(f"Sheet '{sheet_name}' not found in workbook.")
         
-        # Hide gridlines
+        # Load the sheet
         wb_sheet = workbook[sheet_name]
-        wb_sheet.sheet_view.showGridLines = False
 
-        # Save the workbook to a temporary file
-        with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp:
-            temp_decrypted_path = tmp.name
-            workbook.save(temp_decrypted_path)
+        # Extract the data from the specified cell range (e.g., 'A1:H33')
+        cells = wb_sheet[cell_range]
+        data = []
+        for row in cells:
+            data_row = [cell.value for cell in row]
+            data.append(data_row)
 
-        # Generate image using excel2img
-        excel2img.export_img(temp_decrypted_path, image_path, sheet_name, cell_range)
+        # Convert the data to a numpy array for plotting
+        data_array = np.array(data)
+
+        # Plot the data as an image using matplotlib
+        fig, ax = plt.subplots(figsize=(10, 6))  # Set the size of the plot
+        ax.axis('off')  # Turn off the axis
+        ax.table(cellText=data, cellLoc='center', loc='center', colLabels=None, cellColours=None, bbox=[0, 0, 1, 1])
+
+        # Save the plot as an image
+        plt.savefig(image_path, bbox_inches='tight', pad_inches=0.1)
+        plt.close(fig)  # Close the figure to free memory
+
         logger.info(f"Generated image for '{sheet_name}' -> {image_path}")
 
     except Exception as e:
