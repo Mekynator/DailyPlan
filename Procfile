@@ -1,3 +1,3 @@
-web: npm start
+web: gunicorn -b :$PORT app:app
 
 
