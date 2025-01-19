@@ -1,31 +1,29 @@
-# Use Python 3.10 slim as the base image
-FROM python:3.10-slim
+# Use the official Python base image
+FROM python:3.9-slim
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-# Set the working directory in the container
+# Set the working directory
 WORKDIR /app
 
-# Install system dependencies (if any)
-# RUN apt-get update && apt-get install -y <packages> && rm -rf /var/lib/apt/lists/*
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    libffi-dev \
+    libgmp-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy the dependencies file to the working directory
-COPY requirements.txt /app/
+# Copy the application code to the container
+COPY . /app
 
 # Install Python dependencies
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-# Copy the rest of the application code
-COPY . /app/
+# Set environment variables
+ENV FLASK_APP=app.py
+ENV FLASK_ENV=production
 
-# Expose the port the app runs on
-EXPOSE 8000
+# Expose port 5000 for the Flask app
+EXPOSE 5000
 
-# Define environment variable (can be overridden by Koyeb)
-ENV PORT=8000
-
-# Run the application
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:8000"]
+# Run the Flask app
+CMD ["flask", "run", "--host=0.0.0.0", "--port=5000"]
