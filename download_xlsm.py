@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('GoogleDriveLogger')
 
 # Path to your downloaded JSON credentials
-SERVICE_ACCOUNT_FILE = '/workspace/DailyPlan/credintials/service-account-file.json'  # <-- Update this path
+SERVICE_ACCOUNT_FILE = '/workspace/DailyPlan/credentials/service-account-file.json'  # <-- Update this path
 
 # Define the scope
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
