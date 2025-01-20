@@ -118,3 +118,51 @@
 2025-01-20 09:17:24,307 - FlaskAppLogger - ERROR - Failed to download SharePoint file: ClientContext.with_credentials() takes 2 positional arguments but 3 were given
 2025-01-20 09:17:24,309 - FlaskAppLogger - ERROR - Error generating image for 'Friday': Unable to download Excel file from SharePoint.
 2025-01-20 09:17:24,309 - FlaskAppLogger - ERROR - Failed to generate image for page 'Friday': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:57,005 - FlaskAppLogger - ERROR - Failed to download SharePoint file: ClientContext.with_credentials() takes 2 positional arguments but 3 were given
+2025-01-20 09:17:57,006 - FlaskAppLogger - ERROR - Error generating image for 'Morning': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:57,006 - FlaskAppLogger - ERROR - Failed to generate image for page 'Morning': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:57,006 - FlaskAppLogger - ERROR - Failed to download SharePoint file: ClientContext.with_credentials() takes 2 positional arguments but 3 were given
+2025-01-20 09:17:57,006 - FlaskAppLogger - ERROR - Error generating image for 'Evening': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:57,006 - FlaskAppLogger - ERROR - Failed to generate image for page 'Evening': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:57,006 - FlaskAppLogger - ERROR - Failed to download SharePoint file: ClientContext.with_credentials() takes 2 positional arguments but 3 were given
+2025-01-20 09:17:57,006 - FlaskAppLogger - ERROR - Error generating image for 'Night': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:57,006 - FlaskAppLogger - ERROR - Failed to generate image for page 'Night': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:57,006 - FlaskAppLogger - ERROR - Failed to download SharePoint file: ClientContext.with_credentials() takes 2 positional arguments but 3 were given
+2025-01-20 09:17:57,006 - FlaskAppLogger - ERROR - Error generating image for 'Friday': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:57,007 - FlaskAppLogger - ERROR - Failed to generate image for page 'Friday': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:57,748 - FlaskAppLogger - ERROR - Failed to download SharePoint file: ClientContext.with_credentials() takes 2 positional arguments but 3 were given
+2025-01-20 09:17:57,748 - FlaskAppLogger - ERROR - Error generating image for 'Morning': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:57,749 - FlaskAppLogger - ERROR - Failed to generate image for page 'Morning': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:57,749 - FlaskAppLogger - ERROR - Failed to download SharePoint file: ClientContext.with_credentials() takes 2 positional arguments but 3 were given
+2025-01-20 09:17:57,749 - FlaskAppLogger - ERROR - Error generating image for 'Evening': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:57,749 - FlaskAppLogger - ERROR - Failed to generate image for page 'Evening': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:57,749 - FlaskAppLogger - ERROR - Failed to download SharePoint file: ClientContext.with_credentials() takes 2 positional arguments but 3 were given
+2025-01-20 09:17:57,749 - FlaskAppLogger - ERROR - Error generating image for 'Night': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:57,749 - FlaskAppLogger - ERROR - Failed to generate image for page 'Night': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:57,749 - FlaskAppLogger - ERROR - Failed to download SharePoint file: ClientContext.with_credentials() takes 2 positional arguments but 3 were given
+2025-01-20 09:17:57,749 - FlaskAppLogger - ERROR - Error generating image for 'Friday': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:57,749 - FlaskAppLogger - ERROR - Failed to generate image for page 'Friday': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:58,197 - FlaskAppLogger - ERROR - Failed to download SharePoint file: ClientContext.with_credentials() takes 2 positional arguments but 3 were given
+2025-01-20 09:17:58,198 - FlaskAppLogger - ERROR - Error generating image for 'Morning': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:58,198 - FlaskAppLogger - ERROR - Failed to generate image for page 'Morning': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:58,198 - FlaskAppLogger - ERROR - Failed to download SharePoint file: ClientContext.with_credentials() takes 2 positional arguments but 3 were given
+2025-01-20 09:17:58,198 - FlaskAppLogger - ERROR - Error generating image for 'Evening': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:58,198 - FlaskAppLogger - ERROR - Failed to generate image for page 'Evening': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:58,198 - FlaskAppLogger - ERROR - Failed to download SharePoint file: ClientContext.with_credentials() takes 2 positional arguments but 3 were given
+2025-01-20 09:17:58,198 - FlaskAppLogger - ERROR - Error generating image for 'Night': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:58,198 - FlaskAppLogger - ERROR - Failed to generate image for page 'Night': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:58,198 - FlaskAppLogger - ERROR - Failed to download SharePoint file: ClientContext.with_credentials() takes 2 positional arguments but 3 were given
+2025-01-20 09:17:58,198 - FlaskAppLogger - ERROR - Error generating image for 'Friday': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:58,199 - FlaskAppLogger - ERROR - Failed to generate image for page 'Friday': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:58,341 - FlaskAppLogger - ERROR - Failed to download SharePoint file: ClientContext.with_credentials() takes 2 positional arguments but 3 were given
+2025-01-20 09:17:58,341 - FlaskAppLogger - ERROR - Error generating image for 'Morning': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:58,342 - FlaskAppLogger - ERROR - Failed to generate image for page 'Morning': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:58,342 - FlaskAppLogger - ERROR - Failed to download SharePoint file: ClientContext.with_credentials() takes 2 positional arguments but 3 were given
+2025-01-20 09:17:58,342 - FlaskAppLogger - ERROR - Error generating image for 'Evening': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:58,342 - FlaskAppLogger - ERROR - Failed to generate image for page 'Evening': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:58,342 - FlaskAppLogger - ERROR - Failed to download SharePoint file: ClientContext.with_credentials() takes 2 positional arguments but 3 were given
+2025-01-20 09:17:58,342 - FlaskAppLogger - ERROR - Error generating image for 'Night': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:58,342 - FlaskAppLogger - ERROR - Failed to generate image for page 'Night': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:58,342 - FlaskAppLogger - ERROR - Failed to download SharePoint file: ClientContext.with_credentials() takes 2 positional arguments but 3 were given
+2025-01-20 09:17:58,342 - FlaskAppLogger - ERROR - Error generating image for 'Friday': Unable to download Excel file from SharePoint.
+2025-01-20 09:17:58,342 - FlaskAppLogger - ERROR - Failed to generate image for page 'Friday': Unable to download Excel file from SharePoint.
