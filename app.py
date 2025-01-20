@@ -1,6 +1,6 @@
 import os
 import logging
-from flask import Flask, redirect, url_for, send_file, jsonify, render_template
+from flask import Flask, url_for, render_template
 from dotenv import load_dotenv
 from office365.sharepoint.client_context import ClientContext
 from openpyxl import load_workbook
@@ -52,12 +52,13 @@ def download_sharepoint_file():
         ctx.load(file)
         ctx.execute_query()
 
-        with open(os.path.join(IMAGE_FOLDER, 'downloaded_file.xlsm'), 'wb') as local_file:
+        local_file_path = os.path.join(IMAGE_FOLDER, 'downloaded_file.xlsm')
+        with open(local_file_path, 'wb') as local_file:
             file.download(local_file)
             ctx.execute_query()
 
         logger.info("File downloaded successfully.")
-        return os.path.join(IMAGE_FOLDER, 'downloaded_file.xlsm')
+        return local_file_path
     except Exception as e:
         logger.error(f"Failed to download SharePoint file: {e}")
         return None
@@ -139,3 +140,6 @@ def home():
         return "<h1>No images available for the active pages.</h1>"
 
     return render_template('index.html', pages=pages)
+
+if __name__ == '__main__':
+    app.run(debug=True)
