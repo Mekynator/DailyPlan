@@ -1,18 +1,21 @@
 import os
-from dotenv import load_dotenv
-from office365.runtime.auth.user_credential import UserCredential
-from office365.sharepoint.client_context import ClientContext
-import tempfile
 import logging
+from dotenv import load_dotenv
+from office365.sharepoint.client_context import ClientContext
+from office365.runtime.auth.user_credential import UserCredential
 
 # Setup logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('TestLogger')
+logger.setLevel(logging.DEBUG)  # Set to DEBUG for detailed logs
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
 
 # Load environment variables
 load_dotenv()
 
-# SharePoint credentials and file paths
 SHAREPOINT_SITE_URL = os.getenv('SHAREPOINT_SITE_URL')
 SHAREPOINT_FILE_URL = os.getenv('SHAREPOINT_FILE_URL')
 SHAREPOINT_USERNAME = os.getenv('SHAREPOINT_USERNAME')
@@ -21,31 +24,39 @@ SHAREPOINT_PASSWORD = os.getenv('SHAREPOINT_PASSWORD')
 def download_sharepoint_file():
     """Download the Excel file from SharePoint"""
     try:
-        # Verify that all environment variables are set
+        # Validate environment variables
         if not all([SHAREPOINT_SITE_URL, SHAREPOINT_FILE_URL, SHAREPOINT_USERNAME, SHAREPOINT_PASSWORD]):
-            logger.error("One or more SharePoint environment variables are not set.")
-            raise ValueError("SharePoint configuration incomplete.")
-        
-        # Set up SharePoint authentication
+            logger.error("One or more environment variables are missing.")
+            return None
+
+        logger.debug(f"SharePoint Site URL: {SHAREPOINT_SITE_URL}")
+        logger.debug(f"SharePoint File URL: {SHAREPOINT_FILE_URL}")
+        logger.debug(f"SharePoint Username: {SHAREPOINT_USERNAME}")
+        # Do not log the password for security reasons
+
+        # Set up SharePoint authentication using UserCredential
         credentials = UserCredential(SHAREPOINT_USERNAME, SHAREPOINT_PASSWORD)
         ctx = ClientContext(SHAREPOINT_SITE_URL).with_credentials(credentials)
         
-        # Fetch the file from SharePoint
-        file = ctx.web.get_file_by_server_relative_url(SHAREPOINT_FILE_URL)
-        ctx.load(file)
+        # Define the download path
+        download_dir = 'downloads'
+        os.makedirs(download_dir, exist_ok=True)
+        download_path = os.path.join(download_dir, 'Plan.xlsm')
+        
+        # Attempt to download the file
+        logger.debug(f"Attempting to download the file from {SHAREPOINT_FILE_URL} to {download_path}")
+        response = ctx.web.get_file_by_server_relative_url(SHAREPOINT_FILE_URL).download(download_path)
         ctx.execute_query()
         
-        # Use tempfile to create a temporary file for the downloaded Excel file
-        with tempfile.NamedTemporaryFile(suffix='.xlsm', delete=False) as temp_file:
-            file.download(temp_file)
-            ctx.execute_query()
-            temp_file_path = temp_file.name
-        
-        logger.info(f"File downloaded successfully to {temp_file_path}")
-        return temp_file_path
+        logger.info("File downloaded successfully.")
+        return download_path
     except Exception as e:
         logger.error(f"Failed to download SharePoint file: {e}")
         return None
 
-if __name__ == '__main__':
-    download_sharepoint_file()
+if __name__ == "__main__":
+    downloaded_file = download_sharepoint_file()
+    if downloaded_file and os.path.exists(downloaded_file):
+        logger.info(f"Downloaded file path: {downloaded_file}")
+    else:
+        logger.error("Download failed or file does not exist.")
