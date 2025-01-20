@@ -1,6 +1,6 @@
 import os
 import logging
-from flask import Flask, url_for, render_template
+from flask import Flask, redirect, url_for, send_file, jsonify, render_template
 from dotenv import load_dotenv
 from office365.sharepoint.client_context import ClientContext
 from openpyxl import load_workbook
@@ -124,6 +124,7 @@ def home():
         image_filename = f"{page}.png"
         image_path = os.path.join(IMAGE_FOLDER, image_filename)
 
+        # Check if the image already exists to avoid regenerating it
         if not os.path.exists(image_path):
             try:
                 generate_image(sheet_name, cell_range, image_path)
@@ -138,6 +139,3 @@ def home():
         return "<h1>No images available for the active pages.</h1>"
 
     return render_template('index.html', pages=pages)
-
-if __name__ == '__main__':
-    app.run(debug=True)
