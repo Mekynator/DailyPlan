@@ -226,3 +226,15 @@
 2025-01-20 09:30:46,574 - FlaskAppLogger - ERROR - Failed to download SharePoint file: name 'UserCredential' is not defined
 2025-01-20 09:30:46,575 - FlaskAppLogger - ERROR - Error generating image for 'Friday': Unable to download Excel file from SharePoint.
 2025-01-20 09:30:46,575 - FlaskAppLogger - ERROR - Failed to generate image for page 'Friday': Unable to download Excel file from SharePoint.
+2025-01-20 09:32:13,383 - FlaskAppLogger - ERROR - Failed to download SharePoint file: name 'ClientContext' is not defined
+2025-01-20 09:32:13,383 - FlaskAppLogger - ERROR - Error generating image for 'Morning': Unable to download Excel file from SharePoint.
+2025-01-20 09:32:13,383 - FlaskAppLogger - ERROR - Failed to generate image for page 'Morning': Unable to download Excel file from SharePoint.
+2025-01-20 09:32:13,383 - FlaskAppLogger - ERROR - Failed to download SharePoint file: name 'ClientContext' is not defined
+2025-01-20 09:32:13,383 - FlaskAppLogger - ERROR - Error generating image for 'Evening': Unable to download Excel file from SharePoint.
+2025-01-20 09:32:13,383 - FlaskAppLogger - ERROR - Failed to generate image for page 'Evening': Unable to download Excel file from SharePoint.
+2025-01-20 09:32:13,384 - FlaskAppLogger - ERROR - Failed to download SharePoint file: name 'ClientContext' is not defined
+2025-01-20 09:32:13,384 - FlaskAppLogger - ERROR - Error generating image for 'Night': Unable to download Excel file from SharePoint.
+2025-01-20 09:32:13,384 - FlaskAppLogger - ERROR - Failed to generate image for page 'Night': Unable to download Excel file from SharePoint.
+2025-01-20 09:32:13,384 - FlaskAppLogger - ERROR - Failed to download SharePoint file: name 'ClientContext' is not defined
+2025-01-20 09:32:13,384 - FlaskAppLogger - ERROR - Error generating image for 'Friday': Unable to download Excel file from SharePoint.
+2025-01-20 09:32:13,384 - FlaskAppLogger - ERROR - Failed to generate image for page 'Friday': Unable to download Excel file from SharePoint.
