@@ -10,7 +10,7 @@ logger = logging.getLogger('TestLogger')
 site_url = "https://dscloud-my.sharepoint.com/personal/mark_szeibert_sallinggroup_com"
 file_url = "/personal/mark_szeibert_sallinggroup_com/Documents/Plan.xlsm"
 download_path = "downloads/Plan.xlsm"
-username = "mark_szeibert@sallinggroup.com"
+username = "mark.szeibert@sallinggroup.com"
 password = ""  # Consider using environment variables or secure storage
 
 try:
