@@ -17,13 +17,6 @@ SHAREPOINT_FILE_URL = os.getenv('SHAREPOINT_FILE_URL')
 SHAREPOINT_USERNAME = os.getenv('SHAREPOINT_USERNAME')
 SHAREPOINT_PASSWORD = os.getenv('SHAREPOINT_PASSWORD')
 
-# Debugging (Remove in Production)
-logger.info(f"SHAREPOINT_SITE_URL: {SHAREPOINT_SITE_URL}")
-logger.info(f"SHAREPOINT_FILE_URL: {SHAREPOINT_FILE_URL}")
-logger.info(f"SHAREPOINT_USERNAME: {SHAREPOINT_USERNAME}")
-# Do NOT log passwords
-
-
 # Logger setup
 logger = logging.getLogger('FlaskAppLogger')
 logger.setLevel(logging.INFO)
