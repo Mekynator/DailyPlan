@@ -2,3 +2,7 @@
 logs/
 __pycache__/
 *.pyc
+# .gitignore
+
+# Exclude service account credentials
+credentials/service-account-file.json
