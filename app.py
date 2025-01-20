@@ -2,7 +2,7 @@ import os
 import logging
 from flask import Flask, url_for, render_template
 from dotenv import load_dotenv
-from office365.sharepoint.client_context import ClientContext
+from office365.runtime.auth.user_credential import UserCredential
 from openpyxl import load_workbook
 import matplotlib.pyplot as plt
 import numpy as np
