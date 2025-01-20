@@ -11,7 +11,7 @@ logger = logging.getLogger('TestLogger')
 site_url = "https://dscloud-my.sharepoint.com/personal/mark_szeibert_sallinggroup_com"
 file_url = "/personal/mark_szeibert_sallinggroup_com/Documents/Plan.xlsm"
 download_path = "downloads/Plan.xlsm"
-username = os.getenv("SHAREPOINT_USERNAME")  # Use environment variables
+username = os.getenv("mark.szeibert@sallinggroup.com")  # Use environment variables
 password = os.getenv("SHAREPOINT_PASSWORD")  # Use environment variables
 
 def download_file():
