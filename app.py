@@ -46,30 +46,30 @@ os.makedirs(IMAGE_FOLDER, exist_ok=True)
 def download_sharepoint_file():
     """Download the Excel file from SharePoint"""
     try:
-        ctx = ClientContext(SHAREPOINT_SITE_URL).with_credentials(SHAREPOINT_USERNAME, SHAREPOINT_PASSWORD)
+        # Verify that all environment variables are set
+        if not all([SHAREPOINT_SITE_URL, SHAREPOINT_FILE_URL, SHAREPOINT_USERNAME, SHAREPOINT_PASSWORD]):
+            logger.error("One or more SharePoint environment variables are not set.")
+            raise ValueError("SharePoint configuration incomplete.")
+        
+        # Set up SharePoint authentication
+        credentials = UserCredential(SHAREPOINT_USERNAME, SHAREPOINT_PASSWORD)
+        ctx = ClientContext(SHAREPOINT_SITE_URL).with_credentials(credentials)
+        
+        # Fetch the file from SharePoint
         file = ctx.web.get_file_by_server_relative_url(SHAREPOINT_FILE_URL)
         ctx.load(file)
         ctx.execute_query()
-
-        local_file_path = os.path.join(IMAGE_FOLDER, 'downloaded_file.xlsm')
-        with open(local_file_path, 'wb') as local_file:
-            file.download(local_file)
+        
+        # Use tempfile to create a temporary file for the downloaded Excel file
+        with tempfile.NamedTemporaryFile(suffix='.xlsm', delete=False) as temp_file:
+            file.download(temp_file)
             ctx.execute_query()
-
-        logger.info("File downloaded successfully.")
-        return local_file_path
+            temp_file_path = temp_file.name
+        
+        logger.info(f"File downloaded successfully to {temp_file_path}")
+        return temp_file_path
     except Exception as e:
         logger.error(f"Failed to download SharePoint file: {e}")
-        return None
-
-def load_workbook_simple(file_path):
-    """Load an unprotected Excel workbook using openpyxl"""
-    try:
-        workbook = load_workbook(file_path, data_only=True)
-        logger.info(f"Successfully loaded workbook: {file_path}")
-        return workbook
-    except Exception as e:
-        logger.error(f"Failed to load workbook '{file_path}': {e}")
         return None
 
 def generate_image(sheet_name, cell_range, image_path):
