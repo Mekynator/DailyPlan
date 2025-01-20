@@ -11,7 +11,7 @@ site_url = "https://dscloud-my.sharepoint.com/personal/mark_szeibert_sallinggrou
 file_url = "/personal/mark_szeibert_sallinggroup_com/Documents/Plan.xlsm"
 download_path = "downloads/Plan.xlsm"
 username = "mark_szeibert@sallinggroup.com"
-password = "Cildrenmek2"  # Consider using environment variables or secure storage
+password = ""  # Consider using environment variables or secure storage
 
 try:
     ctx = ClientContext(site_url).with_credentials(UserCredential(username, password))
