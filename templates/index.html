@@ -1,0 +1,42 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* Your existing CSS styles */
+    </style>
+</head>
+<body>
+    <div id="header">Loading...</div>
+    <div id="image-container"></div>
+    <script>
+        const pages = {{ pages | tojson }};
+        let currentIndex = 0;
+        
+        window.onload = function() {
+            const header = document.getElementById('header');
+            const imageContainer = document.getElementById('image-container');
+
+            const imgElements = pages.map(page => {
+                const img = document.createElement('img');
+                img.src = page.url;
+                imageContainer.appendChild(img);
+                return img;
+            }); 
+
+            function showPage(idx) {
+                imgElements.forEach(img => img.classList.remove('active'));
+                imgElements[idx].classList.add('active');
+                header.innerText = pages[idx].header;
+            }
+
+            setInterval(() => {
+                currentIndex = (currentIndex + 1) % pages.length;
+                showPage(currentIndex);
+            }, 30000);
+
+            showPage(currentIndex);
+        };
+    </script>
+</body>
+</html>
