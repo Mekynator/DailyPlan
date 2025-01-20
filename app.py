@@ -75,33 +75,48 @@ def download_sharepoint_file():
 def generate_image(sheet_name, cell_range, image_path):
     """Generate an image from an Excel sheet using openpyxl and matplotlib"""
     try:
+        # Download the file from SharePoint
         excel_file_path = download_sharepoint_file()
         if not excel_file_path:
             raise Exception("Unable to download Excel file from SharePoint.")
-
+        
+        # Load workbook
         workbook = load_workbook_simple(excel_file_path)
         if not workbook:
             raise Exception("Unable to load workbook for image export.")
-
+        
+        # Check if the sheet exists
         if sheet_name not in workbook.sheetnames:
             raise ValueError(f"Sheet '{sheet_name}' not found in workbook.")
-
+        
+        # Load the sheet
         wb_sheet = workbook[sheet_name]
+
+        # Extract the data from the specified cell range (e.g., 'A1:H33')
         cells = wb_sheet[cell_range]
-        data = [[cell.value for cell in row] for row in cells]
+        data = []
+        for row in cells:
+            data_row = [cell.value for cell in row]
+            data.append(data_row)
+
+        # Convert the data to a numpy array for plotting
         data_array = np.array(data)
 
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.axis('off')
-        table = ax.table(cellText=data, cellLoc='center', loc='center', bbox=[0, 0, 1, 1])
+        # Plot the data as an image using matplotlib
+        fig, ax = plt.subplots(figsize=(10, 6))  # Set the size of the plot
+        ax.axis('off')  # Turn off the axis
+        ax.table(cellText=data, cellLoc='center', loc='center', colLabels=None, cellColours=None, bbox=[0, 0, 1, 1])
 
+        # Save the plot as an image
         plt.savefig(image_path, bbox_inches='tight', pad_inches=0.1)
-        plt.close(fig)
+        plt.close(fig)  # Close the figure to free memory
 
         logger.info(f"Generated image for '{sheet_name}' -> {image_path}")
+
     except Exception as e:
         logger.error(f"Error generating image for '{sheet_name}': {e}")
         raise e
+
 
 @app.route('/')
 def home():
